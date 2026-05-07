@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Shopfloor Mistake Tracker</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- Standard sub-app shell: sticky brand-navy header with [Portal] link
+       (per OPERATIONS_PORTAL STYLE_GUIDE.md §5.1). -->
+  <header class="app-header">
+    <div class="app-header__inner">
+      <a href="/" class="portal-link" title="Back to Operations Portal">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Portal
+      </a>
+      <div class="app-title">
+        <span class="app-emoji">📋</span>
+        <h1>Shopfloor Mistake Tracker</h1>
+      </div>
+      <div class="header-actions">
+        <a href="logs.html" class="header-btn" title="Submission history">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 3h7v7H3z"></path>
+            <path d="M14 3h7v7h-7z"></path>
+            <path d="M3 14h7v7H3z"></path>
+            <path d="M14 14h7v7h-7z"></path>
+          </svg>
+          Show logs
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Step indicator -->
+  <nav class="stepper" aria-label="Progress">
+    <ol>
+      <li class="step active" data-step="1"><span class="dot">1</span><span class="lbl">Details</span></li>
+      <li class="step"        data-step="2"><span class="dot">2</span><span class="lbl">Image</span></li>
+      <li class="step"        data-step="3"><span class="dot">3</span><span class="lbl">Review</span></li>
+      <li class="step"        data-step="4"><span class="dot">4</span><span class="lbl">Submit</span></li>
+    </ol>
+  </nav>
+
+  <main class="container">
+
+    <!-- Step 1: Entry details -->
+    <section class="card" id="form-card">
+      <header class="card-head">
+        <span class="step-badge">Step 1</span>
+        <h3>Entry details</h3>
+      </header>
+
+      <form id="entry-form" autocomplete="off">
+        <div class="grid">
+          <div class="field">
+            <label class="field-label" for="uploadedBy">Uploaded by *</label>
+            <input type="text" id="uploadedBy" required placeholder="Your name" />
+          </div>
+
+          <!-- Project Number — typeahead UI per OPERATIONS_PORTAL_PROJECT_LOOKUP_GUIDE
+               Pattern A (server-side search). The frontend calls
+               `${API}/api/projects/search` which is a thin proxy that loops
+               back to /projects/api/work-orders on the same Node process.
+               Until that proxy exists (i.e. while we're still on Apps Script),
+               the typeahead degrades to a free-text input with a "Projects
+               app unavailable" hint, and submission still works. -->
+          <div class="field typeahead">
+            <label class="field-label" for="projectNumber">Project number *</label>
+            <input type="text"
+                   id="projectNumber"
+                   name="projectNumber"
+                   required
+                   autocomplete="off"
+                   placeholder="Type WO number, company, or project name to search…" />
+            <div id="project-list" class="typeahead-list hidden"></div>
+            <small id="project-help" class="field-help">Pulls live from the Projects Table — type to search.</small>
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="projectName">Project name <span class="field-optional">(optional)</span></label>
+            <input type="text" id="projectName" placeholder="Project / job name" />
+          </div>
+
+          <div class="field">
+            <label class="field-label" for="entryDate">Date *</label>
+            <input type="date" id="entryDate" required />
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- Step 2: Add an image -->
+    <section class="card" id="image-card">
+      <header class="card-head">
+        <span class="step-badge">Step 2</span>
+        <h3>Add an image</h3>
+      </header>
+      <p class="muted">Choose a file from this device or take a live photo with the camera.</p>
+
+      <div class="upload-actions">
+        <label class="action-tile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+          <span class="action-tile__title">Upload from device</span>
+          <span class="action-tile__sub">JPG, PNG, HEIC…</span>
+          <input type="file" id="imageInput" accept="image/*" hidden />
+        </label>
+
+        <button type="button" id="captureBtn" class="action-tile">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          <span class="action-tile__title">Take a photo</span>
+          <span class="action-tile__sub">Live camera (tablet / phone)</span>
+        </button>
+      </div>
+
+      <div id="fileName" class="file-name"></div>
+    </section>
+
+    <!-- Step 3: Text analysis -->
+    <section class="card hidden" id="ocr-card">
+      <header class="card-head">
+        <span class="step-badge">Step 3</span>
+        <h3>Text analysis</h3>
+      </header>
+      <div id="ocr-status" class="status">Analyzing image text…</div>
+      <div id="ocr-results"></div>
+    </section>
+
+    <!-- Step 3b: Annotate -->
+    <section class="card hidden" id="annotate-card">
+      <header class="card-head">
+        <span class="step-badge">Step 3b</span>
+        <h3>Mark other issues <span class="field-optional">(optional)</span></h3>
+      </header>
+      <p class="muted">Use the tools below to circle, arrow, or freehand any non-spelling defects.</p>
+
+      <div class="toolbar">
+        <button type="button" class="tool-btn active" data-tool="circle">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle></svg>
+          Circle
+        </button>
+        <button type="button" class="tool-btn" data-tool="arrow">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>
+          Arrow
+        </button>
+        <button type="button" class="tool-btn" data-tool="freehand">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l4-4 5 5 9-9"></path></svg>
+          Freehand
+        </button>
+
+        <span class="toolbar-divider"></span>
+
+        <span class="toolbar-control">
+          <span>Color</span>
+          <input type="color" id="strokeColor" value="#dc2626" />
+        </span>
+        <span class="toolbar-control">
+          <span>Width</span>
+          <input type="range" id="strokeWidth" min="2" max="12" value="4" />
+        </span>
+
+        <span class="toolbar-divider"></span>
+
+        <button type="button" id="undoBtn" class="ghost-btn">Undo</button>
+        <button type="button" id="clearBtn" class="ghost-btn">Clear</button>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="annotateCanvas"></canvas>
+      </div>
+
+      <div class="field" style="margin-top: 12px;">
+        <label class="field-label" for="notes">Notes <span class="field-optional">(optional)</span></label>
+        <textarea id="notes" rows="3" placeholder="Describe the mistake or context…"></textarea>
+      </div>
+    </section>
+
+    <!-- Step 4: Submit -->
+    <section class="card hidden" id="submit-card">
+      <header class="card-head">
+        <span class="step-badge">Step 4</span>
+        <h3>Submit</h3>
+      </header>
+      <div class="submit-row">
+        <button type="button" id="submitBtn" class="btn-primary">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13"></path><path d="M22 2l-7 20-4-9-9-4z"></path></svg>
+          Submit entry
+        </button>
+        <button type="button" id="resetBtn" class="ghost-btn">Reset</button>
+      </div>
+      <div id="submit-status" class="status"></div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <small>Backend: <code id="backend-url-display">(not set)</code></small>
+  </footer>
+
+  <!-- Tesseract.js for OCR -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.0.4/dist/tesseract.min.js"></script>
+
+  <!-- App scripts -->
+  <script src="js/dictionary.js"></script>
+  <script src="js/ocr.js"></script>
+  <script src="js/annotate.js"></script>
+  <script src="js/camera.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/projects.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

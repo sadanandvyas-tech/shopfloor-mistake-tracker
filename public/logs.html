@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Submission history — Shopfloor Mistake Tracker</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <!-- Standard sub-app shell (matches index.html) -->
+  <header class="app-header">
+    <div class="app-header__inner">
+      <a href="/" class="portal-link" title="Back to Operations Portal">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        Portal
+      </a>
+      <div class="app-title">
+        <span class="app-emoji">📋</span>
+        <h1>Submission history</h1>
+      </div>
+      <div class="header-actions">
+        <a href="index.html" class="header-btn" title="Back to the entry form">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="19" y1="12" x2="5" y2="12"></line>
+            <polyline points="12 19 5 12 12 5"></polyline>
+          </svg>
+          Back to app
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <div class="logs-toolbar">
+        <div class="search-wrap">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="search" id="filter" placeholder="Search entries (project, name, notes…)" />
+        </div>
+        <span class="logs-stats" id="stats"></span>
+        <button type="button" class="ghost-btn" id="refreshBtn">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
+            <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"></path>
+          </svg>
+          Refresh
+        </button>
+      </div>
+
+      <div id="status" class="status"></div>
+
+      <div class="logs-table-wrap">
+        <table class="logs-table" id="logsTable">
+          <thead>
+            <tr>
+              <th>Submitted</th>
+              <th>Date</th>
+              <th>Project</th>
+              <th>Uploaded by</th>
+              <th>Spelling issues</th>
+              <th>Notes</th>
+              <th>Image</th>
+            </tr>
+          </thead>
+          <tbody id="logsBody">
+            <!-- rows injected by logs.js -->
+          </tbody>
+        </table>
+      </div>
+
+      <div id="empty" class="empty-state hidden">
+        <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+        <p>No entries yet.</p>
+        <a href="index.html" class="btn-primary">Create the first entry</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="app-footer">
+    <small>Backend: <code id="backend-url-display">(not set)</code></small>
+  </footer>
+
+  <script src="js/api.js"></script>
+  <script src="js/logs.js"></script>
+</body>
+</html>
